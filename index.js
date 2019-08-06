@@ -1,8 +1,35 @@
+const startupDebugger = require('debug')('app:startup');
+const dbDebugger = require('debug')('app:db');
+const config = require('config');
+const morgan = require('morgan');
+const helmet = require('helmet');
 const express = require('express');
 const Joi = require('joi');
+const logger = require('./logger');
 
 const app = express();
-app.use(express.json());
+
+app.use(express.json()); //req.body
+app.use(express.urlencoded({extended:true}));// support form data
+app.use(express.static('public')); //adds public folder no public folder not in URL
+app.get(helmet());
+
+app.use(logger);
+
+
+
+
+
+
+// Configuration
+console.log("app name: "+config.get('name'));
+console.log('mail server: '+config.get('mail.host'));
+
+
+app.use(function(req, res, next){
+    console.log('Authenticating...');
+    next();
+});
 
 var courses = [
     {id:1, name: "course1"},
@@ -37,7 +64,7 @@ app.post('/api/courses/', (req, res) => {
     if(error) return res.status(400).send(error.details[0].message);
         
 
-    
+
     
     const course = {
         id: courses.length+1,
